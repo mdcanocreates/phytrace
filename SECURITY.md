@@ -16,7 +16,7 @@ If you discover a security vulnerability in phytrace, please report it responsib
 ### How to Report
 
 1. **Do NOT** open a public GitHub issue for security vulnerabilities
-2. Email security details to: [INSERT SECURITY EMAIL]
+2. Email security details to: mdcanocreates@gmail.com
    - Include a clear description of the vulnerability
    - Provide steps to reproduce (if applicable)
    - Include any proof-of-concept code (if safe to share)
