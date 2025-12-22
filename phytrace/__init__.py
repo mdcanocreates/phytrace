@@ -9,7 +9,7 @@ A minimal wrapper around scipy.integrate.solve_ivp that adds:
 - Deterministic execution by default
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # Core functionality
 from .core import trace_run
