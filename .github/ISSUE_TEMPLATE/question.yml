@@ -1,0 +1,34 @@
+name: Question / clarification
+description: Ask a question about usage, behavior, or design
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help. For broader discussions, consider using [Discussions](https://github.com/mdcanocreates/phytrace/discussions).
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: Describe your use case or what you're trying to accomplish.
+      placeholder: I'm trying to trace a system with...
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: What approaches have you already attempted?
+      placeholder: I tried... but I got...
+
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Minimal code snippet
+      description: If applicable, provide a minimal example that illustrates your question.
+      render: python
+      placeholder: |
+        import phytrace
+        # your code here
