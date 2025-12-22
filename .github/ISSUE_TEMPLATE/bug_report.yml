@@ -1,0 +1,78 @@
+name: Bug report
+description: Report unexpected behavior or errors
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the information below to help us diagnose the issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the unexpected behavior or error you encountered.
+      placeholder: Tell us what you see
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: Describe what you expected to happen instead.
+      placeholder: Tell us what you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide minimal steps to reproduce the issue.
+      placeholder: |
+        1. Install phytrace with...
+        2. Run script with...
+        3. See error...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: phytrace version
+      description: "Run: `python -c 'import phytrace; print(phytrace.__version__)'`"
+      placeholder: "e.g., 0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: "Run: `python --version`"
+      placeholder: "e.g., Python 3.11.5"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      placeholder: "e.g., macOS 14.2, Ubuntu 22.04, Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence-pack
+    attributes:
+      label: Evidence pack (if available)
+      description: Provide path to evidence pack or link to zipped pack if this helps reproduce the issue.
+      placeholder: "/path/to/evidence_pack_YYYYMMDD_HHMMSS" or link to uploaded .zip
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Traceback
+      description: Include relevant logs, error messages, or tracebacks.
+      render: shell
