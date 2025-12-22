@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest an enhancement or new feature
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please provide details below.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this feature solve? What use case does it address?
+      placeholder: "As a user, I need... because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe your proposed solution or feature.
+      placeholder: Add a new API that...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: I also thought about... but...
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Is this a small incremental change or a larger architectural change?
+      options:
+        - v0.1.x (small fix/enhancement)
+        - v0.2+ (bigger feature/breaking change)
+    validations:
+      required: true
