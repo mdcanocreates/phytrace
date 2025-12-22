@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/mdcanocreates/phytrace/discussions
+    about: Ask questions and share ideas
+  - name: 📚 Documentation
+    url: https://phytrace.readthedocs.io
+    about: Check the documentation for answers
+

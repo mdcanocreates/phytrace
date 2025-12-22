@@ -1,0 +1,44 @@
+name: Question
+description: Ask a question about phytrace
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help! For quick questions, consider using [Discussions](https://github.com/mdcanocreates/phytrace/discussions) instead.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Your question here...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context about your question
+      placeholder: |
+        - What are you trying to accomplish?
+        - What have you tried so far?
+        - Any relevant code snippets?
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant)
+      description: Your environment details if relevant to the question
+      placeholder: |
+        - OS: [e.g. macOS 14.0]
+        - Python version: [e.g. 3.11.0]
+        - phytrace version: [e.g. 0.1.0]
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I have read the Code of Conduct and agree to follow it
+          required: true
+
