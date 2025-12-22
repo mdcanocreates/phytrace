@@ -1,7 +1,7 @@
 # phytrace
 
-[![Tests](https://img.shields.io/badge/tests-pending-yellow)](https://github.com/yourusername/phytrace)
-[![Coverage](https://img.shields.io/badge/coverage-pending-yellow)](https://codecov.io/gh/yourusername/phytrace)
+[![Tests](https://img.shields.io/badge/tests-pending-yellow)](https://github.com/mdcanocreates/phytrace)
+[![Coverage](https://img.shields.io/badge/coverage-pending-yellow)](https://codecov.io/gh/mdcanocreates/phytrace)
 [![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/phytrace/)
 [![Python](https://img.shields.io/badge/python-3.9+-blue)](https://www.python.org/downloads/)
 
@@ -336,10 +336,10 @@ If you use `phytrace` in your research, please cite:
 ```bibtex
 @software{phytrace,
   title = {phytrace: Provenance tracking for scientific simulations},
-  author = {phytrace contributors},
+  author = {mdcanocreates},
   version = {0.1.0},
   year = {2025},
-  url = {https://github.com/yourusername/phytrace}
+  url = {https://github.com/mdcanocreates/phytrace}
 }
 ```
 
