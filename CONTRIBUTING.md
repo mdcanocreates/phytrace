@@ -6,7 +6,7 @@ Thank you for your interest in contributing to phytrace!
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/phytrace.git
+git clone https://github.com/mdcanocreates/phytrace.git
 cd phytrace
 ```
 
