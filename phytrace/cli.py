@@ -14,11 +14,46 @@ try:
     CLICK_AVAILABLE = True
 except ImportError:
     CLICK_AVAILABLE = False
-    # Fallback if click not available
-    def click(*args, **kwargs):
-        def decorator(f):
-            return f
-        return decorator
+    # Fallback if click not available (should not happen if installed correctly)
+    class ClickFallback:
+        @staticmethod
+        def group(*args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+        
+        @staticmethod
+        def command(*args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+        
+        @staticmethod
+        def argument(*args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+        
+        @staticmethod
+        def option(*args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+        
+        @staticmethod
+        def echo(*args, **kwargs):
+            print(*args, **kwargs)
+        
+        @staticmethod
+        def Path(*args, **kwargs):
+            from pathlib import Path as P
+            return P
+        
+        @staticmethod
+        def Choice(*args, **kwargs):
+            return lambda x: x
+    
+    click = ClickFallback()
 
 try:
     from rich.console import Console
