@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2025-12-22
+
+### Added
+- **Reproducibility Contract**: Explicit contract defining what is captured, what is best-effort, and what is NOT guaranteed
+- **Enhanced Validation Command**: Comprehensive validation with JSON output, checks for environment capture, seed info, and reproducibility contract
+- **CLI `info` command**: Display reproducibility contract and phytrace information
+- Reproducibility contract included in all evidence pack manifests
+
+### Changed
+- **Invariant Semantics Clarification**: Documentation now explicitly states invariants are runtime diagnostics, not formal proofs
+- **Documentation Tightening**: Added positioning statement, "Why not DVC/MLflow/git?" section, and improved clarity
+- Enhanced `validate` command with comprehensive checks and warnings
+- README updated with reproducibility contract information
+
+### Fixed
+- Validation command now checks for reproducibility contract presence
+- Improved error messages and validation reporting
+
 ## [0.1.1] - 2025-12-22
 
 ### Changed

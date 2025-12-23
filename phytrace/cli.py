@@ -32,6 +32,7 @@ except ImportError:
 from .evidence import create_evidence_pack
 from .golden import store_golden, load_golden, compare_results
 from .types import TraceResult
+from .reproducibility import get_reproducibility_contract
 
 
 if RICH_AVAILABLE:
@@ -127,13 +128,22 @@ __pycache__/
 
 @cli.command()
 @click.argument('evidence_dir', type=click.Path(exists=True))
-def validate(evidence_dir: str):
+@click.option('--json', 'output_json', is_flag=True, help='Output validation results as JSON')
+def validate(evidence_dir: str, output_json: bool):
     """Validate an evidence pack.
     
     Checks completeness, verifies JSON validity, and lists any issues.
+    Performs comprehensive validation including:
+    - Manifest completeness
+    - Environment capture presence
+    - Seed information presence
+    - Invariant logs existence
+    - File structure integrity
     """
     evidence_path = Path(evidence_dir)
     issues = []
+    warnings = []
+    checks = {}
     
     # Check required files
     required_files = [
@@ -144,14 +154,18 @@ def validate(evidence_dir: str):
     ]
     
     for file in required_files:
-        if not (evidence_path / file).exists():
+        file_path = evidence_path / file
+        if not file_path.exists():
             issues.append(f"Missing required file: {file}")
+        checks[f"file_{file}"] = file_path.exists()
     
     # Check directories
     required_dirs = ['data', 'plots', 'checks']
     for dir_name in required_dirs:
-        if not (evidence_path / dir_name).exists():
+        dir_path = evidence_path / dir_name
+        if not dir_path.exists():
             issues.append(f"Missing required directory: {dir_name}")
+        checks[f"dir_{dir_name}"] = dir_path.exists()
     
     # Validate JSON files
     json_files = ['manifest.json', 'invariants.json']
@@ -160,39 +174,149 @@ def validate(evidence_dir: str):
         if json_path.exists():
             try:
                 with open(json_path) as f:
-                    json.load(f)
+                    data = json.load(f)
+                    checks[f"json_valid_{json_file}"] = True
             except json.JSONDecodeError as e:
                 issues.append(f"Invalid JSON in {json_file}: {e}")
+                checks[f"json_valid_{json_file}"] = False
+    
+    # Check manifest completeness
+    manifest_path = evidence_path / 'manifest.json'
+    manifest = None
+    if manifest_path.exists():
+        try:
+            with open(manifest_path) as f:
+                manifest = json.load(f)
+            
+            # Check environment capture
+            if 'environment' not in manifest:
+                issues.append("Missing environment information in manifest")
+            else:
+                env = manifest.get('environment', {})
+                checks["has_environment"] = True
+                if 'python' not in env:
+                    warnings.append("Python version not captured in environment")
+                if 'packages' not in env:
+                    warnings.append("Package versions not captured in environment")
+            
+            # Check seed information
+            if 'seeds' not in manifest:
+                issues.append("Missing seed information in manifest")
+            else:
+                seeds = manifest.get('seeds', {})
+                checks["has_seeds"] = True
+                if not any(seeds.values()):
+                    warnings.append("No seeds were successfully set")
+            
+            # Check reproducibility contract
+            if 'reproducibility_contract' not in manifest:
+                warnings.append("Reproducibility contract not present in manifest (v0.1.2+)")
+            else:
+                checks["has_reproducibility_contract"] = True
+            
+            # Check simulation parameters
+            if 'simulation' not in manifest:
+                issues.append("Missing simulation information in manifest")
+            else:
+                sim = manifest.get('simulation', {})
+                checks["has_simulation"] = True
+                if 'params' not in sim:
+                    warnings.append("No parameters recorded in simulation")
+                if 'solver' not in sim:
+                    warnings.append("No solver configuration recorded")
+            
+            # Check invariant logs
+            if 'invariants' not in manifest:
+                warnings.append("No invariant definitions in manifest")
+            else:
+                checks["has_invariants"] = True
+            
+        except Exception as e:
+            issues.append(f"Error reading manifest: {e}")
+            checks["manifest_readable"] = False
     
     # Check data files
     data_dir = evidence_path / 'data'
     if data_dir.exists():
-        if not (data_dir / 'trajectory.csv').exists():
+        csv_exists = (data_dir / 'trajectory.csv').exists()
+        checks["has_trajectory_csv"] = csv_exists
+        if not csv_exists:
             issues.append("Missing trajectory.csv in data/")
-    
-    # Report results
-    if issues:
-        click.echo("✗ Validation failed. Issues found:")
-        for issue in issues:
-            click.echo(f"  - {issue}")
-        click.echo(f"\nTotal issues: {len(issues)}")
     else:
-        click.echo("✓ Evidence pack is valid and complete")
-        
-        # Show summary
-        manifest_path = evidence_path / 'manifest.json'
-        if manifest_path.exists():
-            with open(manifest_path) as f:
-                manifest = json.load(f)
+        checks["has_trajectory_csv"] = False
+    
+    # Check invariants.json
+    invariants_path = evidence_path / 'invariants.json'
+    if invariants_path.exists():
+        try:
+            with open(invariants_path) as f:
+                inv_data = json.load(f)
+                checks["invariants_json_valid"] = True
+                if not inv_data:
+                    warnings.append("invariants.json is empty")
+        except Exception as e:
+            issues.append(f"Error reading invariants.json: {e}")
+            checks["invariants_json_valid"] = False
+    else:
+        checks["invariants_json_valid"] = False
+    
+    # Prepare results
+    validation_result = {
+        "valid": len(issues) == 0,
+        "issues": issues,
+        "warnings": warnings,
+        "checks": checks,
+        "summary": {
+            "total_issues": len(issues),
+            "total_warnings": len(warnings),
+            "checks_passed": sum(1 for v in checks.values() if v),
+            "checks_total": len(checks)
+        }
+    }
+    
+    # Output results
+    if output_json:
+        click.echo(json.dumps(validation_result, indent=2))
+    else:
+        if issues:
+            click.echo("✗ Validation failed. Issues found:")
+            for issue in issues:
+                click.echo(f"  - {issue}")
+            if warnings:
+                click.echo("\nWarnings:")
+                for warning in warnings:
+                    click.echo(f"  - {warning}")
+            click.echo(f"\nTotal issues: {len(issues)}")
+            click.echo(f"Total warnings: {len(warnings)}")
+        else:
+            click.echo("✓ Evidence pack is valid and complete")
+            if warnings:
+                click.echo("\nWarnings:")
+                for warning in warnings:
+                    click.echo(f"  - {warning}")
             
-            click.echo(f"\nSummary:")
-            click.echo(f"  Run ID: {manifest.get('run_id', 'unknown')}")
-            click.echo(f"  Timestamp: {manifest.get('timestamp', 'unknown')}")
-            sim = manifest.get('simulation', {})
-            click.echo(f"  Function: {sim.get('function', 'unknown')}")
-            stats = manifest.get('solver_stats', {})
-            click.echo(f"  Success: {stats.get('success', False)}")
-            click.echo(f"  Function evaluations: {stats.get('nfev', 0)}")
+            # Show summary
+            if manifest:
+                click.echo(f"\nSummary:")
+                click.echo(f"  Run ID: {manifest.get('run_id', 'unknown')}")
+                click.echo(f"  Timestamp: {manifest.get('timestamp', 'unknown')}")
+                sim = manifest.get('simulation', {})
+                click.echo(f"  Function: {sim.get('function', 'unknown')}")
+                stats = manifest.get('solver_stats', {})
+                click.echo(f"  Success: {stats.get('success', False)}")
+                click.echo(f"  Function evaluations: {stats.get('nfev', 0)}")
+                
+                # Show reproducibility contract summary if present
+                if 'reproducibility_contract' in manifest:
+                    contract = manifest['reproducibility_contract']
+                    click.echo(f"\nReproducibility Contract:")
+                    click.echo(f"  Captured: {len(contract.get('captured', {}))} items")
+                    click.echo(f"  Best-effort: {len(contract.get('best_effort', {}))} items")
+                    click.echo(f"  Not guaranteed: {len(contract.get('not_guaranteed', {}))} items")
+    
+    # Exit with error code if validation failed
+    if issues:
+        raise click.ClickException(f"Validation failed with {len(issues)} issues")
 
 
 @cli.command()
@@ -283,6 +407,34 @@ def compare(dir1: str, dir2: str, tolerance: float):
             click.echo("\nNote: Install pandas for trajectory comparison")
         except Exception as e:
             click.echo(f"\nError comparing trajectories: {e}")
+
+
+@cli.command()
+def info():
+    """Display reproducibility contract and phytrace information.
+    
+    Shows what phytrace guarantees for reproducibility, what is best-effort,
+    and what is explicitly not guaranteed.
+    """
+    contract = get_reproducibility_contract()
+    
+    if RICH_AVAILABLE:
+        console.print("\n[bold]phytrace Reproducibility Contract[/bold]\n")
+        console.print(contract.get_summary())
+        console.print("\n[bold]What is Captured:[/bold]")
+        for key, desc in contract.captured.items():
+            console.print(f"  • {key.replace('_', ' ').title()}: {desc}")
+        console.print("\n[bold]Best-Effort (May Not Always Succeed):[/bold]")
+        for key, desc in contract.best_effort.items():
+            console.print(f"  • {key.replace('_', ' ').title()}: {desc}")
+        console.print("\n[bold]What is NOT Guaranteed:[/bold]")
+        for key, desc in contract.not_guaranteed.items():
+            console.print(f"  • {key.replace('_', ' ').title()}: {desc}")
+        console.print("\n[bold]Known Limitations:[/bold]")
+        for limitation in contract.limitations:
+            console.print(f"  • {limitation}")
+    else:
+        click.echo(contract.to_markdown())
 
 
 @cli.command()

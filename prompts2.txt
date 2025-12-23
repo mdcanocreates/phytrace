@@ -1,0 +1,231 @@
+Great — here’s a **clean, execution-ready prompt scaffold** plus **phased plans** for **both v0.1.2 (tightening)** and **v0.1.3 (feature expansion)**. This is written so you can drop it straight into Cursor or use it as an internal roadmap.
+
+---
+
+## v0.1.2 — Credibility & Tightening Release
+
+Theme: *Make claims precise, testable, and defensible.*
+
+This release answers skeptics and stabilizes semantics.
+
+### Goals
+
+* Make “audit-ready” concrete, not rhetorical
+* Close gaps exposed by community feedback
+* Reduce ambiguity around reproducibility, scope, and guarantees
+* Improve confidence without increasing surface area
+
+---
+
+### Phase 0 — Ground Rules (do first)
+
+Prompt scaffold:
+
+> You are working on phytrace v0.1.2.
+> This release MUST NOT introduce new solver support or expand scope.
+> Focus only on clarification, validation, determinism, and credibility.
+> If a change increases ambiguity or scope, reject it.
+
+---
+
+### Phase 1 — Reproducibility Contract (high priority)
+
+Why: multiple comments directly questioned seeds, versions, and guarantees.
+
+Tasks:
+
+* Explicit `ReproducibilityContract` object or doc
+* Enumerate:
+
+  * what is captured (Python version, deps, seeds, solver config)
+  * what is best-effort
+  * what is explicitly NOT guaranteed
+* Add this to:
+
+  * README
+  * evidence pack metadata
+  * CLI `phytrace info`
+
+Prompt scaffold:
+
+> Add a reproducibility contract that is explicit, inspectable, and serialized into evidence packs.
+> Avoid claims of determinism where the runtime cannot guarantee it.
+
+---
+
+### Phase 2 — Validation Command (core credibility win)
+
+Why: turns “audit-ready” into a pass/fail condition.
+
+Tasks:
+
+* `phytrace validate <evidence_dir>`
+* Checks:
+
+  * manifest completeness
+  * environment capture present
+  * seed info present
+  * invariant logs exist
+  * hash consistency (if applicable)
+* Outputs:
+
+  * human-readable report
+  * machine-readable JSON
+
+Prompt scaffold:
+
+> Implement a validation command that verifies evidence pack integrity without re-running the simulation.
+> Validation must be deterministic and side-effect free.
+
+---
+
+### Phase 3 — Invariant Semantics Clarification
+
+Why: invariants were mentioned repeatedly but under-explained.
+
+Tasks:
+
+* Rename or document invariant severities clearly
+* Explicitly state:
+
+  * invariants are runtime diagnostics, not proofs
+  * violation ≠ incorrect physics
+* Add example invariant failure to docs
+
+Prompt scaffold:
+
+> Clarify invariant semantics so they cannot be confused with formal verification.
+> Every invariant failure must be explainable in plain language.
+
+---
+
+### Phase 4 — Documentation Tightening
+
+Tasks:
+
+* 60-second README test
+* One-sentence positioning everywhere:
+  “Audit-ready tracing, not certification or formal verification.”
+* Add “Why not DVC / MLflow / git?” section (neutral tone)
+
+Prompt scaffold:
+
+> Rewrite documentation to pre-empt the most common criticisms without dismissing them.
+
+---
+
+### Exit Criteria for v0.1.2
+
+* No new features
+* All claims testable or explicitly limited
+* “This already exists” criticism clearly answered
+* Validation command working end-to-end
+
+---
+
+## v0.1.3 — Capability Expansion Release
+
+Theme: *Spend the trust you earned.*
+
+This is where you add power — but on stable semantics.
+
+---
+
+### Phase 0 — Lock v0.1.2 Semantics
+
+Prompt scaffold:
+
+> Assume v0.1.2 semantics are frozen.
+> Do not change definitions of reproducibility, invariants, or audit-ready behavior.
+
+---
+
+### Phase 1 — Solver Abstraction (most requested feature)
+
+Why: SciPy-only was repeatedly mentioned.
+
+Tasks:
+
+* Define a minimal stepping interface:
+
+  * step(state, t)
+  * metadata hook
+* Refactor `solve_ivp` support to use adapter
+* Add one additional backend (e.g. custom Euler or control-style loop)
+
+Prompt scaffold:
+
+> Generalize solver support via adapters without breaking SciPy behavior.
+> Avoid a monolithic “solver API” — keep it minimal.
+
+---
+
+### Phase 2 — Control-Friendly Hooks
+
+Why: multiple control-theory users engaged.
+
+Tasks:
+
+* Discrete-time support
+* Event-based logging
+* Controller state capture
+* Optional reference tracking errors as invariants
+
+Prompt scaffold:
+
+> Extend phytrace to support control workflows without imposing control abstractions.
+
+---
+
+### Phase 3 — Benchmark / Plugin Integration
+
+Why: explicit interest in benchmark libraries.
+
+Tasks:
+
+* “instrument this run” API
+* No solver ownership
+* Example: plug phytrace into an external benchmark harness
+
+Prompt scaffold:
+
+> Allow phytrace to act as instrumentation, not orchestration.
+
+---
+
+### Phase 4 — Comparison & Regression (optional)
+
+Tasks:
+
+* Golden run comparisons
+* Tolerance-aware diffs
+* Visual + numeric deltas
+
+Prompt scaffold:
+
+> Implement comparison as diagnostic tooling, not statistical testing.
+
+---
+
+### Exit Criteria for v0.1.3
+
+* At least one non-SciPy integration
+* Control-friendly example
+* Zero changes to v0.1.2 guarantees
+* Clear growth path to v0.2.0
+
+---
+
+## Why This Sequencing Works
+
+* v0.1.2 answers *“why should I trust this?”*
+* v0.1.3 answers *“how far can I take this?”*
+
+You are not slowing down.
+You are **reducing the probability of building the wrong thing next**.
+
+If you want, next we can:
+
+* write the exact Cursor prompt for Phase 1 of v0.1.2
+* draft the validation spec
+* or design the solver adapter interface before any code is written

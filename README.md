@@ -2,10 +2,12 @@
 
 [![Tests](https://img.shields.io/badge/tests-pending-yellow)](https://github.com/mdcanocreates/phytrace)
 [![Coverage](https://img.shields.io/badge/coverage-pending-yellow)](https://codecov.io/gh/mdcanocreates/phytrace)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/phytrace/)
+[![Version](https://img.shields.io/badge/version-0.1.2-blue)](https://pypi.org/project/phytrace/)
 [![Python](https://img.shields.io/badge/python-3.9+-blue)](https://www.python.org/downloads/)
 
 A Python library that adds provenance tracking, invariant checking, and evidence generation to scientific simulations. `phytrace` is a minimal wrapper around `scipy.integrate.solve_ivp` that makes your simulations audit-ready and reproducible by default, without requiring any refactoring of existing code.
+
+**Positioning**: Audit-ready tracing, not certification or formal verification.
 
 ## Overview
 
@@ -107,8 +109,13 @@ def check_energy(t, y, params, **kwargs):
 result = trace_run(..., invariants=invariants)
 ```
 
+**Important**: Invariants are runtime diagnostics, not formal proofs.
+- A violation does not necessarily mean the physics is incorrect
+- A passing invariant does not prove correctness
+- Violations help catch errors early but are not a substitute for validation
+
 Severity levels:
-- **warning**: Logs violations but continues
+- **warning**: Logs violations but continues simulation
 - **error**: Logs violations, sets `checks_passed=False`, but continues
 - **critical**: Stops simulation immediately with RuntimeError
 
@@ -133,15 +140,15 @@ evidence/run_001/
 └── report.md             # Human-readable summary
 ```
 
-### Deterministic Execution
+### Reproducibility
 
-Automatic seed management ensures reproducibility:
+Automatic seed management and environment capture enable reproducibility:
 
 ```python
-# Same seed = identical results
+# Same seed = identical results (on same architecture)
 result1 = trace_run(..., seed=42)
 result2 = trace_run(..., seed=42)
-# result1.y == result2.y (identical)
+# result1.y == result2.y (identical on same system)
 ```
 
 Seeds are set for:
@@ -149,6 +156,8 @@ Seeds are set for:
 - Python's random module
 - PyTorch (if available)
 - JAX (if available)
+
+**Reproducibility Contract**: `phytrace` captures execution environment, parameters, seeds, and results to enable reproducibility. However, exact bit-for-bit reproducibility cannot be guaranteed across different architectures or when external non-deterministic code is involved. See `phytrace info` for the complete contract.
 
 ## Installation
 
@@ -302,16 +311,46 @@ No refactoring required.
 4. Use the same seed (captured in manifest)
 5. Run the simulation
 
-The evidence pack contains everything needed.
+The evidence pack contains everything needed. Note: exact bit-for-bit reproducibility may not be possible across different architectures or compilers due to floating-point arithmetic differences.
+
+### Why not DVC / MLflow / git?
+
+**DVC (Data Version Control)**: DVC is excellent for versioning large datasets and pipelines, but `phytrace` focuses on capturing the complete execution context of individual simulation runs. DVC doesn't automatically capture environment details, seed states, or invariant checks. Use both: DVC for data versioning, `phytrace` for run provenance.
+
+**MLflow**: MLflow tracks ML experiments with parameters and metrics, but it's designed for machine learning workflows. `phytrace` is purpose-built for ODE simulations with solver-specific tracking, invariant checking, and physics-focused evidence generation. If you're doing ML, use MLflow. If you're solving ODEs, use `phytrace`.
+
+**Git**: Git tracks code changes, but not execution environment, random seeds, or numerical results. `phytrace` complements git by capturing everything git doesn't: runtime state, environment, and results. Use git for code versioning, `phytrace` for execution provenance.
+
+**When to use `phytrace`**: When you need to document, reproduce, or audit individual simulation runs with complete context. When you need evidence packs for publications or regulatory submissions. When you want automatic invariant checking during simulation.
+
+## CLI Tools
+
+`phytrace` includes command-line tools for working with evidence packs:
+
+```bash
+# Validate an evidence pack
+phytrace validate ./evidence/run_001
+
+# Validate and output JSON
+phytrace validate ./evidence/run_001 --json
+
+# Display reproducibility contract
+phytrace info
+
+# Compare two evidence packs
+phytrace compare ./evidence/run_001 ./evidence/run_002
+
+# Initialize a new project
+phytrace init ./my_project
+```
 
 ## Roadmap (v0.2)
 
 Planned features:
-- **Golden test framework**: Regression testing for simulations
-- **Multi-solver comparison**: Compare results across different solvers
-- **Assumption ledger**: Track modeling assumptions
+- **Solver abstraction**: Support for non-SciPy solvers
+- **Control-friendly hooks**: Discrete-time and event-based support
+- **Benchmark integration**: Plugin architecture for external benchmarks
 - **Jupyter integration**: Magic commands and inline visualization
-- **CLI tools**: Validate and compare evidence packs
 - **Performance profiling**: Detailed overhead analysis
 
 ## Contributing
@@ -367,7 +406,13 @@ If you use `phytrace` in your research, please cite:
 
 ## Status
 
-This project is in **early development** (v0.1.0). Core functionality is implemented and tested, but the API may evolve. Feedback and contributions welcome!
+This project is in **early development** (v0.1.2). Core functionality is implemented and tested, but the API may evolve. Feedback and contributions welcome!
+
+## Reproducibility Contract
+
+`phytrace` makes explicit guarantees about what it captures and what it cannot guarantee. Run `phytrace info` to see the complete contract, or check the `reproducibility_contract` field in any evidence pack's `manifest.json`.
+
+**Quick summary**: We capture environment, parameters, seeds, and results. We cannot guarantee exact bit-for-bit reproducibility across architectures or when external non-deterministic code is involved.
 
 ---
 

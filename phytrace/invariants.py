@@ -4,6 +4,11 @@ Invariant checking system for runtime verification of simulation constraints.
 This module provides tools for checking physical and mathematical invariants
 during simulation execution, such as energy conservation, bounds checking,
 and monotonicity.
+
+IMPORTANT: Invariants are runtime diagnostics, not formal proofs.
+- A violation does not necessarily mean the physics is incorrect
+- A passing invariant does not prove correctness
+- Invariants help catch errors early but are not a substitute for validation
 """
 
 from functools import wraps
@@ -125,10 +130,18 @@ def create_invariant(name: str, severity: str = 'warning'):
     
     Args:
         name: Name of the invariant
-        severity: Severity level ('warning', 'error', 'critical')
+        severity: Severity level:
+            - 'warning': Logs violations but continues simulation
+            - 'error': Logs violations, sets checks_passed=False, but continues
+            - 'critical': Stops simulation immediately with RuntimeError
     
     Returns:
         Decorator function that converts a function to an InvariantCheck
+    
+    Note:
+        Invariants are runtime diagnostics, not formal proofs. A violation
+        indicates a potential issue but does not prove the simulation is
+        incorrect. Similarly, passing invariants do not prove correctness.
     
     Example:
         >>> @create_invariant(name="energy_conserved", severity="critical")

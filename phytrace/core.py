@@ -17,6 +17,7 @@ from .environment import capture_environment
 from .invariants import InvariantChecker, InvariantCheck
 from .seeds import set_global_seeds
 from .types import ParamsDict, StateVector, TraceResult
+from .reproducibility import get_reproducibility_contract
 
 
 def trace_run(
@@ -187,6 +188,10 @@ def trace_run(
         ode_result=ode_result,
         violation_log=violation_log
     )
+    
+    # Add reproducibility contract to manifest
+    contract = get_reproducibility_contract()
+    manifest['reproducibility_contract'] = contract.to_dict()
     
     # Step 9: Create TraceResult
     trace_result = TraceResult(

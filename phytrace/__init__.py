@@ -9,7 +9,7 @@ A minimal wrapper around scipy.integrate.solve_ivp that adds:
 - Deterministic execution by default
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Core functionality
 from .core import trace_run
@@ -26,6 +26,9 @@ from .types import TraceResult, ParamsDict, StateVector
 # Golden test framework (v0.1.0 - basic functionality)
 from .golden import GoldenTest, golden_test, store_golden, compare_results
 
+# Reproducibility contract (v0.1.2)
+from .reproducibility import get_reproducibility_contract, ReproducibilityContract
+
 __all__ = [
     "trace_run",
     "InvariantCheck",
@@ -41,6 +44,8 @@ __all__ = [
     "golden_test",
     "store_golden",
     "compare_results",
+    "get_reproducibility_contract",
+    "ReproducibilityContract",
 ]
 
 # Note: Advanced features (comparison, assumptions) are implemented but
